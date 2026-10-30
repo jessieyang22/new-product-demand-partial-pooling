@@ -1,0 +1,2 @@
+criterion,triggered,evidence
+F4 M4 80% interval after conformal recalibration has test coverage outside 0.72 to 0.88 (k=4),FALSE,"test coverage after recalibration 0.8579 (raw 0.8579), scale c = 1"

@@ -1,0 +1,6 @@
+criterion,triggered,evidence
+F1 M4 beats best of M0/M3 at k=4 by >=3 pts with CI excluding 0,TRUE,"diff=15.80 pts, CI [-9.58, 66.08], M4 WAPE 0.8376, best comparator 0.6795"
+F2 analog-only M5 not better than global-average M5g at k=4,TRUE,"WAPE M5=0.9640, M5g=0.9502"
+F3 tau indistinguishable from zero (LRT p >= 0.05 at k=4),FALSE,"LRT boundary p at k=4 = 0, tau = 2.2982"
+F6 fewer than 500 test launches at k=12 (4 target weeks),TRUE,test launches with k=12 and 4 targets = 394
+F7 M4 optimiser did not converge at any k,FALSE,all k converged (optim code 0)

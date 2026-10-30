@@ -1,0 +1,2 @@
+k,target,comparators,wape_target,wape_best_comparator,wape_comparators,diff_pts,ci_low_pts,ci_high_pts,n_products,decision_F1_M4_better
+4,M4,M0/M3,0.837552353375229,0.67954538031941,M0=0.6795 M3=1.2706,15.800697305582,-9.57746842763056,66.0784044889757,579,FALSE

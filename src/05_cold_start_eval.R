@@ -117,3 +117,15 @@ fail <- data.table(
 )
 print(fail)
 fwrite(fail, "results/B_failure_criteria_F1_F3_F6_F7.csv")
+
+# ---- POST-HOC CHECK (added after the test results had been read; NOT one of the pre-registered F1 to F7) ----
+# The pre-registered F7 uses only the optimiser code. That check does not catch the failure seen at
+# k = 8, 12, 16, 20, where the optimiser returned code 0 but the random-effect spread diverged
+# (tau in the order of 1e8 to 1e9) and the marginal log-likelihood fell below the nested model with
+# no random effect. Such a fit is treated as failed here. It is reported, not repaired (DESIGN.md section 6, F7).
+post <- R$info[, .(k, tau, m4_loglik, m4_null_loglik,
+                   loglik_below_nested = m4_loglik < m4_null_loglik,
+                   tau_above_10 = tau > 10)]
+post[, posthoc_failed := loglik_below_nested | tau_above_10]
+print(post)
+fwrite(post, "results/B_posthoc_M4_fit_sanity_by_k.csv")
