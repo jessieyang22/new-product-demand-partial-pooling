@@ -174,3 +174,41 @@ Tooling: R. Installed packages to add: readxl, data.table, MASS, glmmTMB, cmdsta
 - Commit messages end with `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
 - No raw data committed. No claim in the README without a matching CSV in `results/`.
 - No analogies or metaphors in the README or any prose. Every step is explained in plain English.
+
+## 10. Amendments made before the test evaluation (dated 2026-10-30)
+
+These notes were written after the development-only steps (scripts 01 and 02) and before any
+test-set prediction or metric was produced. The commit that contains this section, and the
+code and config in `src/`, is the protocol lock (see `results/PROTOCOL_LOCK.txt`).
+
+**A1. Fitting method for M4.** cmdstanr is not installed and CmdStan is not available on this machine. glmmTMB could not be installed (its dependencies `nloptr` and `lme4` failed to build). So the Bayesian fit in section 4 (component B, M4) was not run. No R-hat is reported. M4 is instead a random-intercept negative binomial fitted by maximum marginal likelihood (empirical Bayes). The product effect is integrated on a 61-point grid over N(0,1) scaled by tau. Convergence is the code from `optim` (BFGS). Failure criterion F7 applies to this optimiser. The Bayesian version is not run and is not claimed.
+
+**A2. Analog offset in M4.** The analog curve (log(1 + mean units of the analog set at the same week since launch)) enters M4 as a fixed covariate with an estimated coefficient, not as a fixed offset with coefficient 1.
+
+**A3. Analog similarity.** Text similarity is cosine similarity of TF-IDF vectors of the most frequent Description as of the origin week. The IDF is estimated only from descriptions sold in burn-in weeks 1 to 8, so no later text enters the weights. The similarity score is w_text * cosine - w_price * |difference in log median price| + w_quarter * (same launch quarter), with w = (1, 0.5, 0.25). These weights were fixed before any result and were not tuned. K was chosen on development launches only, from {10, 20, 40}, by the analog-only forecast WAPE at k = 4 (`results/C_dev_K_selection.csv`). K = 40 was chosen. The differences between K values are small (see that file). Test-set K variants 10 and 20 are reported in the robustness grid.
+
+**A4. Analog pool and fallback.** A launch is an analog for product p at origin o if its launch week is at or before L_p - 4. This is exactly the rule that its weeks 1 to k+4 all end on or before the origin. When no analog exists, the analog curve is the global average over development launches at each week since launch (weeks with data up to the training cutoff). The number of products that use the fallback is recorded in `info` (`fb_analog_train`, `fb_analog_test`).
+
+**A5. Point forecast.** Every model is scored on its predictive mean. M0, M1, M2 and M3 use their NB mean. M4 uses the posterior predictive mean. M5 and M5g use their analog or global mean. The same rule applies to all models.
+
+**A6. Dispersion for models without their own.** M0, M5 and M5g use the dispersion of the pooled M3 GLM, fitted on development target rows. M1 uses a method-of-moments dispersion from its own weeks (or the global value at k = 1, where the variance is undefined). Series with variance at or below the mean are treated as Poisson-like (dispersion 1e4). M2 uses the maximum likelihood dispersion of an intercept-only NB on its own weeks, clipped to [0.05, 1e4]. M2 falls back to the global dispersion at k <= 2. Counts of these fallbacks are stored in the `fb` column of the predictions. Note: M1 and M2 have identical point forecasts, because the intercept-only NB mean equals the sample mean. They differ only in their intervals.
+
+**A7. M3 pooling.** M3 is one NB GLM fitted once across all k on development target rows (h = 1 to 4, target week at or before 52), as DESIGN.md section 4 says. Its features are log(1 + own mean), k, h, log median price, and sine and cosine of the launch day-of-year.
+
+**A8. M4 pooling and prediction.** M4 is refitted for each k on development rows (history and target weeks, all at or before week 52). For a test product, its random effect is the posterior given its own first k weeks only, with the development-fitted hyperparameters held fixed. The product's target weeks are never used.
+
+**A9. Conformal recalibration (component E).** Intervals are the 10 to 90 and 25 to 75 quantiles of 1000 predictive draws around the median. Recalibration multiplies the half-widths by a scale c, the smallest value on a grid (step 0.01) at which the development coverage reaches the nominal level. c is set on development (train-set) predictions and applied once to the test predictions. For M3 and M4 these development predictions are in-sample, so their calibration is optimistic, and this is stated in the README.
+
+**A10. Failure criteria, operational definitions.** F1 uses DESIGN.md section 5 item 6. F2 is triggered when M5 WAPE is greater than or equal to M5g WAPE at k = 4. F3 is triggered when the likelihood-ratio test of tau = 0 (boundary 50:50 mixture, one degree of freedom) gives p >= 0.05 at k = 4. F5 uses the time-split variants only. The random-split variant is reported as a warning check. F6 uses the test count at k = 12 with 4 target weeks. F4 uses the 80% conformal test coverage of M4 at k = 4, within [0.72, 0.88].
+
+**A11. Robustness variants.** These run at k = 4 only, because F5 is judged on the k = 4 headline. "Drop top 1% of products" uses volume in the development period (weeks 1 to 52) only, so that test-period volume does not enter the cohort. "Launch threshold 5" means the launch week is the first week with at least 5 units. "Returns netted" floors each product-week at zero after netting. "Poisson" replaces the NB likelihood with a Poisson likelihood in every model. The random split puts a fixed random 59% of eligible products in training, with no training cutoff at week 52. It is a leaky warning check only.
+
+**A12. Known-truth benchmark (mature products truncated to pretend launch).** Not run in this pass. Its design is not specified precisely enough in section 4 to run without further choices. The primary validation is the held-out time split (section 5), which satisfies the requirement for a held-out set. The README says this plainly.
+
+**A13. Simulation layer (component G).** Run as a labelled method check (`results/sim_*`). Simulated results are not evidence about real demand.
+
+**A14. Cleaning rule 1 and DCGS codes.** Kept exactly as written in section 3 rule 1. The 34 DCGS codes (157 lines) are therefore dropped. DATA.md section 6 asks the owner to decide. This is left for Jessie, and the README reports it as an open decision.
+
+**A15. Week-of-year term.** The seasonal feature is the day-of-year of the launch week, as section 4 (M3) says. It is not the calendar week of each target. The training cutoff still stops test-period calendar information from reaching the fit.
+
+**A16. Commit attribution.** Commit messages end with the Co-Authored-By line that the session specifies, Claude Haiku 5.5, which matches the repository's previous commit. Section 9 of this file names Claude Sonnet 5.5. The session's attribution rule takes precedence, and the README notes the difference.

@@ -1,0 +1,13 @@
+truncation_week,check,n_compared,n_mismatch,result
+40,launch set up to truncation identical,721,0,PASS
+40,weekly units up to truncation identical,15134,0,PASS
+40,as-of log median price up to truncation identical,15134,0,PASS
+40,as-of description up to truncation identical,15134,0,PASS
+40,analog sets identical (sampled origins),447,0,PASS
+40,analog curves identical (sampled origins),447,0,PASS
+90,launch set up to truncation identical,1379,0,PASS
+90,weekly units up to truncation identical,69279,0,PASS
+90,as-of log median price up to truncation identical,69279,0,PASS
+90,as-of description up to truncation identical,69279,0,PASS
+90,analog sets identical (sampled origins),449,0,PASS
+90,analog curves identical (sampled origins),449,0,PASS

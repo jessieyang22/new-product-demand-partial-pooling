@@ -1,0 +1,8 @@
+step,lines
+lines in combined table,1044848
+after rule 1 (product-like StockCode),1038856
+"after rule 2 (Price > 0, date in window)",1032918
+lines kept (weeks 1 to 105),1015309
+first positive week >= 9 with threshold (before burn-in test),4684
+after burn-in zero-demand rule,1661
+launch products,1661
