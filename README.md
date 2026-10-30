@@ -104,20 +104,20 @@ Other contrasts at k = 4 (`results/B_secondary_contrasts_k4.csv`):
 
 | k | M0 carry-forward | M3 global NB | M4 partial pooling | M5 analog-only | M5g global curve |
 |---|---|---|---|---|---|
-| 1 | 2.410 | 2.151 | **1.413** | 0.992 | 0.983 |
+| 1 | 2.410 | 2.151 | 1.413 | 0.992 | **0.983** |
 | 2 | **0.929** | 1.629 | 1.089 | 0.952 | 0.966 |
 | 3 | **0.790** | 1.484 | 0.965 | 0.955 | 0.959 |
 | 4 | **0.680** | 1.271 | 0.838 | 0.964 | 0.950 |
-| 6 | 0.741 | 1.183 | **0.783** | 0.954 | 0.971 |
+| 6 | **0.741** | 1.183 | 0.783 | 0.954 | 0.971 |
 | 8 | **0.793** | 1.021 | not usable (see 5.1) | 0.963 | 0.941 |
-| 12 | 0.802 | 0.907 | not usable | 0.907 | 0.921 |
+| 12 | **0.802** | 0.907 | not usable | 0.907 | 0.921 |
 | 16 | 0.988 | **0.798** | not usable | 0.961 | 0.921 |
 | 20 | **0.699** | 0.723 | not usable | 0.894 | 0.902 |
 | 26 | **0.650** | 0.771 | 0.695 | 0.902 | 0.988 |
 
 Source: `results/B_cold_start_wape_curve.csv`. Bold marks the lowest WAPE in each row among the models that could be fitted. No confidence intervals were computed for k other than 4, so differences at other k are descriptive only.
 
-At k = 1 the partial-pooling model beats carry-forward and the global model. At k = 4 it does not. The pattern is not monotone, and it is not evidence that partial pooling helps across the cold-start range.
+At k = 1 the partial-pooling model beats carry-forward (M0) and the global NB model (M3), but not the analog-only (M5) or global-average (M5g) baselines, which have lower WAPE (0.99 and 0.98). At k = 6 carry-forward is slightly better than M4 (0.741 against 0.783). At k = 4 M4 is worse than carry-forward. The pattern is not monotone, and it is not evidence that partial pooling helps across the cold-start range.
 
 ### 4.3 Pooling diagnostics (component D)
 
@@ -154,7 +154,7 @@ Source: `results/E_calibration_before_after_conformal.csv`. For M4 the 80% inter
 Source: `results/F_robustness_k4.csv`. The baseline row reproduces the headline numbers exactly, which confirms the run is repeatable.
 
 Two variants change the answer:
-- **Returns netted:** M4 is ahead of carry-forward by 6.9 points, and the interval excludes zero. The sign flips.
+- **Returns netted:** M4 is ahead of carry-forward by 6.9 points, and the interval excludes zero. The sign flips. The cause was not traced product by product in the pre-registered run. Section 5.5 shows that one product dominates M4's error in the baseline, and it had a large order cancelled the same day.
 - **Poisson:** M3 beats M4 (the ranking changes), and the M4 gap widens to 54.8 points.
 
 The random product split did not inflate M4. In that run, M4 is also worse than carry-forward.
@@ -209,6 +209,17 @@ M5 (analog-only) is 1.4 points worse than M5g (global average) at k = 4. F2 is t
 - **Bayesian (cmdstanr) fit.** CmdStan is not installed. glmmTMB could not be installed (its dependencies `nloptr` and `lme4` failed to build). The empirical Bayes fit was used instead (see 6.1).
 - **Known-truth benchmark on mature products.** DESIGN.md section 4 describes it, but the specification is not precise enough to run without further choices. The held-out test set is the validation used. This is stated plainly, and the benchmark is future work.
 
+### 5.5 Post-hoc: one product dominates M4's error at k = 4 (descriptive, not a new test)
+
+This check was added after the test results had been read. It is labelled post-hoc in `src/10_posthoc_concentration.R`. It does not change any pre-registered verdict.
+
+- One product (StockCode 23166, a ceramic storage jar) accounts for **26.6%** of M4's total absolute error at k = 4. Its M4 forecast is between about 8,000 and 9,700 units per week for the four target weeks, while the actual units in those weeks are 0.
+- The cause is in its first weeks. A single invoice of 74,215 units was placed on 18 January 2011, and the same day a credit invoice (C541433) reversed all 74,215 units. Primary demand (rule 3) counts the sale and not the credit, so that week is a launch week with 74,215 units. Carry-forward uses only the last week, which is 0, so it is not affected. M4 uses the whole four-week history, so one very large week pulls its level up.
+- Excluding that one product from both models (like-for-like): M0 WAPE is 0.680 (unchanged) and M4 WAPE is 0.615. On that reduced set, M4 would be ahead of carry-forward by about 6.5 points. Excluding the top five M4-error products gives M4 0.613 against M0 0.681.
+- The result is therefore sensitive to one product. The pre-registered answer (F1 not met) stands, because the excluded product was not chosen in advance. Any claim that partial pooling helps at k = 4 on this data would depend on this single product.
+
+Sources: `results/X_posthoc_concentration_summary_k4.csv`, `results/X_posthoc_concentration_by_product_k4.csv`.
+
 ## 6. Deviations from DESIGN.md
 
 All deviations were written as dated amendments in `DESIGN.md` section 10 before the test-set evaluation was run (commit `d3dad85`, lock recorded in `results/PROTOCOL_LOCK.txt`). The main ones:
@@ -248,6 +259,7 @@ Rscript src/06_calibration.R
 Rscript src/07_robustness.R
 Rscript src/08_simulation_check.R
 Rscript src/09_figures.R
+Rscript src/10_posthoc_concentration.R   # post-hoc descriptive check (section 5.5)
 ```
 
 Packages: `readxl`, `data.table`, `MASS`, `Matrix`, `ggplot2`. The fixed seed is 20261029. Intermediate files are written to `data/interim/` (gitignored).
@@ -262,6 +274,7 @@ Figures: `figures/fig1_cold_start_wape.png` (WAPE by k; the M1 line sits under t
 4. Run the Bayesian fit if CmdStan is installed.
 5. The commit attribution line in DESIGN.md section 9 says Sonnet 5.5, while the commits use Haiku 5.5 as the session requires. Pick one and make DESIGN.md match.
 6. No GitHub remote has been created. DESIGN.md section 9 says to push after results and README exist, which is now true. Creating the public repository is a separate decision for Jessie.
+7. Cancelled bulk orders (section 5.5). Rule 3 counts a sale that was later fully reversed. Whether to treat such lines differently is a cleaning decision for a new, pre-registered protocol version, not a change to this one.
 
 ## 10. Repository layout
 
