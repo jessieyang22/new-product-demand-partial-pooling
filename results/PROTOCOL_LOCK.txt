@@ -1,0 +1,7 @@
+PROTOCOL LOCK for new-product-demand-partial-pooling
+Locked commit (code, configuration and DESIGN.md section 10 amendments): d3dad85cb3c15074a5157099d5427d95711d5365
+Lock date (local): 2026-10-30 01:24 EDT
+Before this commit: development-only steps (src/01_clean_and_launches.R, src/02_features_analogs.R) and smoke checks on development rows. No test-set metric had been produced.
+After this commit: src/03 to src/09 are run, which produce the test-set results.
+Any change to code or configuration after this point is a post-hoc change and must be labelled in the README.
+Seed: 20261029 (all random steps).
