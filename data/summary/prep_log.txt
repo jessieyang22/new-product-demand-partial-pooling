@@ -1,0 +1,172 @@
+== prep_raw.R run at 2026-10-30 03:55:51 UTC
+File: data/raw/extracted/online_retail_II.xlsx
+readxl warnings for 'Year 2009-2010': 0
+readxl warnings for 'Year 2010-2011': 0
+
+== Sheet 'Year 2009-2010'
+Data rows (excluding header): 525461
+Excel rows including header:  525462
+Fully empty rows: 0
+Date range (valid dates, calendar day): 2009-12-01 to 2010-12-09
+Timestamp range (UTC): 2009-12-01 07:45:00 to 2010-12-09 20:01:00
+Missing or unreadable InvoiceDate: 0
+NA counts: Invoice=0, StockCode=0, Description=2928, Quantity=0, InvoiceDate=0, Price=0, Customer ID=107927, Country=0
+
+== Sheet 'Year 2010-2011'
+Data rows (excluding header): 541910
+Excel rows including header:  541911
+Fully empty rows: 0
+Date range (valid dates, calendar day): 2010-12-01 to 2011-12-09
+Timestamp range (UTC): 2010-12-01 08:26:00 to 2011-12-09 12:50:00
+Missing or unreadable InvoiceDate: 0
+NA counts: Invoice=0, StockCode=0, Description=1454, Quantity=0, InvoiceDate=0, Price=0, Customer ID=135080, Country=0
+
+== Overlap check, 2010-12-01 to 2010-12-09
+Lines in sheet 1: 22523  (expected 22523)
+Lines in sheet 2: 22523  (expected 22523)
+Overlap rows identical after sorting (all 8 columns, excluding row numbers): TRUE
+Sheet 2 lines dated before 1 Dec 2010 (valid dates): 0
+Sheet 1 lines dated on or after 1 Dec 2010 (valid dates): 22523
+
+== Combined table
+Rows from sheet 1 (before 1 Dec 2010): 502938
+Rows from sheet 2 (from 1 Dec 2010):   541910
+Rows after overlap rule:               1044848
+Rows dropped by window filter:         0
+Rows kept (window 2009-12-01 to 2011-12-09): 1044848
+Combined date range: 2009-12-01 to 2011-12-09
+Lines per calendar year-month (combined):
+  2009-12: 45228
+  2010-01: 31555
+  2010-02: 29388
+  2010-03: 41511
+  2010-04: 34057
+  2010-05: 35323
+  2010-06: 39983
+  2010-07: 33383
+  2010-08: 33306
+  2010-09: 42091
+  2010-10: 59098
+  2010-11: 78015
+  2010-12: 42481
+  2011-01: 35147
+  2011-02: 27707
+  2011-03: 36748
+  2011-04: 29916
+  2011-05: 37030
+  2011-06: 36874
+  2011-07: 39518
+  2011-08: 35284
+  2011-09: 50226
+  2011-10: 60742
+  2011-11: 84711
+  2011-12: 25526
+Saved: data/interim/lines_combined.rds
+
+== Counts the cleaning rules act on (combined table, nothing dropped here)
+total lines                                                                         1044848  (100.0000%)
+invoice starts with C (cancellation)                                                  19165  (1.8342%)
+invoice starts with letter A (adjustment) or other non-digit prefix, not C                6  (0.0006%)
+invoice is all digits                                                               1025677  (98.1652%)
+StockCode missing                                                                         0  (0.0000%)
+StockCode fails 5-digit regex ^[0-9]{5}[A-Za-z]*$ (including missing)                  5992  (0.5735%)
+StockCode passes regex                                                              1038856  (99.4265%)
+Price <= 0                                                                             6029  (0.5770%)
+Quantity <= 0 on non-cancellation lines                                                3393  (0.3247%)
+Quantity > 0 on cancellation lines                                                        1  (0.0001%)
+Customer ID missing                                                                  235287  (22.5188%)
+Description missing                                                                    4275  (0.4092%)
+Description blank or missing                                                           4275  (0.4092%)
+Country missing                                                                           0  (0.0000%)
+
+Non-digit, non-C invoice prefixes:
+   inv_chr lines distinct_invoices example_invoice
+    <char> <int>             <int>          <char>
+1:       A     6                 6         A506401
+
+StockCodes failing the regex: 62 distinct values
+Top 25 by line count:
+       StockCode lines                 example_description sum_quantity
+          <char> <int>                              <char>        <num>
+ 1:         POST  2086                             POSTAGE        10011
+ 2:          DOT  1425                      DOTCOM POSTAGE         2917
+ 3:            M  1398                              Manual         4494
+ 4:           C2   277                            CARRIAGE          711
+ 5:            D   173                            Discount        -2868
+ 6:            S   102                             SAMPLES          -96
+ 7: BANK CHARGES   100                        Bank Charges          -42
+ 8:       ADJUST    67 Adjustment by john on 26/01/2010 16            5
+ 9:    AMAZONFEE    36                          AMAZON FEE          -30
+10:     DCGS0058    31                    MISO PRETTY  GUM           43
+11: gift_0001_20    29  Dotcomgiftshop Gift Voucher £20.00           53
+12: gift_0001_30    29  Dotcomgiftshop Gift Voucher £30.00           77
+13:    DCGSSGIRL    25                              update          191
+14:     DCGSSBOY    23                              update           87
+15:         PADS    19          PADS TO MATCH ALL CUSHIONS           17
+16: gift_0001_10    16  Dotcomgiftshop Gift Voucher £10.00           55
+17:         CRUK    16                     CRUK Commission          -16
+18:      TEST001    15             This is a test product.           55
+19:     DCGS0076    14        SUNJAR LED NIGHT NIGHT LIGHT           17
+20:     DCGS0003    14                 BOXED GLASS ASHTRAY            6
+21: gift_0001_50     8  Dotcomgiftshop Gift Voucher £50.00           19
+22: gift_0001_40     7  Dotcomgiftshop Gift Voucher £40.00           18
+23:     DCGS0069     6               OOH LA LA DOGS COLLAR            0
+24:            B     6                     Adjust bad debt            6
+25:     DCGS0004     5          HAYNES CAMPER SHOULDER BAG            2
+       StockCode lines                 example_description sum_quantity
+          <char> <int>                              <char>        <num>
+    sum_revenue
+          <num>
+ 1:   110430.41
+ 2:   309844.10
+ 3:   -82950.62
+ 4:    13136.00
+ 5:   -12879.63
+ 6:    -6000.85
+ 7:   -35482.25
+ 8:     6835.24
+ 9:  -221520.50
+10:       34.82
+11:      471.06
+12:      610.09
+13:      295.63
+14:      251.35
+15:      -36.58
+16:      126.21
+17:    -7933.43
+18:      202.50
+19:      275.96
+20:       32.59
+21:      253.59
+22:      166.09
+23:       80.31
+24:  -147614.08
+25:       67.94
+    sum_revenue
+          <num>
+
+Distinct StockCode (all, non-missing):             5304
+Distinct StockCode passing regex:                  5242
+Distinct Invoice:                                  53628
+Distinct Customer ID (non-missing):                5942
+Distinct Country:                                  43
+
+Numeric ranges (combined):
+        column       min     p50   max
+        <char>     <num>   <num> <num>
+1:    Quantity -80995.00     3.0 80995
+2:       Price -53594.36     2.1 38970
+3: Customer ID  12346.00 15248.0 18287
+Share of lines with Country == United Kingdom: 91.88%
+
+StockCodes failing the regex, by category:
+  letters only (service/adjustment codes)            codes= 12 lines=  5334 revenue=   -51810.89
+  other                                              codes=  7 lines=   401 revenue=   -21396.95
+  DCGS prefix (dotcom product-like codes)            codes= 34 lines=   157 revenue=     1154.72
+  gift_ prefix (gift vouchers)                       codes=  9 lines=   100 revenue=     1686.61
+Distinct DCGS-prefixed StockCodes: 34
+
+Numeric ranges (combined):
+  Quantity     min=-80995 median=3 max=80995
+  Price        min=-53594.36 median=2.1 max=38970
+  Customer ID  min=12346 median=15248 max=18287

@@ -1,0 +1,5 @@
+category,distinct_codes,lines,sum_revenue
+letters only (service/adjustment codes),12,5334,-51810.89
+other,7,401,-21396.95
+DCGS prefix (dotcom product-like codes),34,157,1154.72
+gift_ prefix (gift vouchers),9,100,1686.61

@@ -1,0 +1,11 @@
+# Raw and intermediate data are never committed (DESIGN.md section 2, size rule)
+data/raw/
+data/interim/
+
+# R session files
+.Rhistory
+.RData
+.Rproj.user/
+
+# Temporary run output
+data/summary/prep_stdout_tmp.txt

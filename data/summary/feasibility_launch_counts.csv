@@ -1,0 +1,9 @@
+item,count
+"lines in the combined table (DATA.md, before filters)",1044848
+"sales lines kept by the filter (product-like code, not cancellation, Quantity > 0, Price > 0)",1014945
+product-like StockCodes with any positive sales in the window,4877
+launch candidates: zero primary demand in burn-in weeks 1 to 8 and a sale after,1662
+launch candidates with L in weeks 9 to 52 (development launches),985
+test launches: L >= 53 (before the data-completeness check),677
+test launches for k = 12 with 4 target weeks observed (L + 15 <= last full week),394
+test launches for k = 4 with 4 target weeks observed (L + 7 <= last full week),579

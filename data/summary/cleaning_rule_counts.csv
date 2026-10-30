@@ -1,0 +1,15 @@
+check,count,share
+total lines,1044848,1
+invoice starts with C (cancellation),19165,0.018342
+"invoice starts with letter A (adjustment) or other non-digit prefix, not C",6,6e-06
+invoice is all digits,1025677,0.981652
+StockCode missing,0,0
+StockCode fails 5-digit regex ^[0-9]{5}[A-Za-z]*$ (including missing),5992,0.005735
+StockCode passes regex,1038856,0.994265
+Price <= 0,6029,0.00577
+Quantity <= 0 on non-cancellation lines,3393,0.003247
+Quantity > 0 on cancellation lines,1,1e-06
+Customer ID missing,235287,0.225188
+Description missing,4275,0.004092
+Description blank or missing,4275,0.004092
+Country missing,0,0

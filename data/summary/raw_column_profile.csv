@@ -1,0 +1,17 @@
+sheet,column,type,rows,n_na,share_na,n_blank_text,n_distinct
+Year 2009-2010,Invoice,character,525461,0,0,0,28816
+Year 2009-2010,StockCode,character,525461,0,0,0,4631
+Year 2009-2010,Description,character,525461,2928,0.005572,0,4643
+Year 2009-2010,Quantity,numeric,525461,0,0,0,825
+Year 2009-2010,InvoiceDate,POSIXct,525461,0,0,0,25296
+Year 2009-2010,Price,numeric,525461,0,0,0,1606
+Year 2009-2010,Customer ID,numeric,525461,107927,0.205395,0,4383
+Year 2009-2010,Country,character,525461,0,0,0,40
+Year 2010-2011,Invoice,character,541910,0,0,0,25900
+Year 2010-2011,StockCode,character,541910,0,0,0,4070
+Year 2010-2011,Description,character,541910,1454,0.002683,0,4211
+Year 2010-2011,Quantity,numeric,541910,0,0,0,722
+Year 2010-2011,InvoiceDate,POSIXct,541910,0,0,0,23260
+Year 2010-2011,Price,numeric,541910,0,0,0,1630
+Year 2010-2011,Customer ID,numeric,541910,135080,0.249266,0,4372
+Year 2010-2011,Country,character,541910,0,0,0,38
