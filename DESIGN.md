@@ -212,3 +212,33 @@ code and config in `src/`, is the protocol lock (see `results/PROTOCOL_LOCK.txt`
 **A15. Week-of-year term.** The seasonal feature is the day-of-year of the launch week, as section 4 (M3) says. It is not the calendar week of each target. The training cutoff still stops test-period calendar information from reaching the fit.
 
 **A16. Commit attribution.** Commit messages end with the Co-Authored-By line that the session specifies, Claude Haiku 5.5, which matches the repository's previous commit. Section 9 of this file names Claude Sonnet 5.5. The session's attribution rule takes precedence, and the README notes the difference.
+
+**A12 update (dated 2026-10-30, post-hoc).** A12 above is kept as written. Its benchmark is now specified and run as section 11. Section 11 was written after the test-set results in section 5 had been read. It is therefore post-hoc, and it does not change F1 to F7 or any pre-registered result.
+
+## 11. Post-hoc known-truth benchmark and reproducibility check (dated 2026-10-30, written after the test results were read)
+
+This section is post-hoc. It was written after the test-set results (section 5) and their CSVs in `results/` were produced. It fixes the choices below before the benchmark is run. The commit that contains this section precedes the first run of `src/11_known_truth_benchmark.R`. Output files use the prefix `KT_`.
+
+**11.1 Purpose.** A real-data check that the forecasting code recovers the truth on products whose later weeks are observed. A pretend launch is placed on steady products, and the truth is their real later demand. This tests forecasting from k weeks of a steady product. It is not a cold-start test (see 11.6).
+
+**11.2 Selection (development period only).** An active product is one with positive units in at least 45 of the 52 development weeks (weeks 1 to 52). Counts, from `src/11`:
+
+- Products with positive units in every week from 1 to 105: 0.
+- Products with positive units in every week from 1 to 52: 0.
+- Products with positive units in at least 45 of weeks 1 to 52: 638.
+
+The selection never looks at weeks 53 or later, because that would condition on the outcome. The 638 products cannot be launch products. At most 44 weeks (9 to 52) can be active for a product with no burn-in sales, so any product with 45 or more active weeks has sales in burn-in and is excluded from the launch cohort by the burn-in rule.
+
+**11.3 Pretend-launch week.** Each active product is assigned to one pretend-launch week L* from {53, 60, 67, 74}, by a seeded random balanced assignment (seed 20261029; `sample(rep(c(53, 60, 67, 74), length.out = n))`). Each product appears once. The targets are weeks L* + k to L* + k + 3. Those weeks end by week 105 for every k in the K grid, since L* + k + 3 is at most 103.
+
+**11.4 History and truth.** History is the real units in weeks L* to L* + k - 1 only. Truth is the real units in the next four weeks, including zeros. No forecast uses a week after its origin.
+
+**11.5 Fits and a consistency check.** Every fitted object comes from development launches only, using the same functions as the test run: `prepare_context`, `prepare_pooled` (M3 pooled across k) and `fit_m4` (M4, per k). Before any benchmark prediction, the script rebuilds these and compares them with `results/` and `data/interim/run_baseline.rds`: the M3 coefficients, the global dispersion, and the M4 tau and log-likelihood at every k. It stops if any value differs.
+
+**11.6 Analog pool and mismatch.** The benchmark products are appended to the context as pretend launches. The analog pool is restricted to real launches (development and test) with L <= L* - 4. The pretend products are never analogs for each other. Price and description are taken as of the origin using sales lines dated on or before the origin. This includes pre-L* lines, which is the one place where pre-L* information enters. The main mismatch is that the launch shape terms (log_s and the analog and global curves) describe the first weeks of a launch. Steady products have no such shape, so M4, M5 and M5g are expected to be disadvantaged. Carry-forward may win for that reason alone. This benchmark therefore does not support or refute partial pooling for cold start.
+
+**11.7 Outputs and rule.** For every model and every k in the K grid: WAPE pooled over h = 1 to 4, bias, 80% and 50% coverage, and mean width (`results/KT_known_truth_by_model_k.csv`). Also by L* at k = 4 (`results/KT_by_Lstar_k4.csv`). The k = 4 contrast uses the section 5 rule (M4 against the better of M0 and M3, a 3-point margin, and a product-clustered bootstrap with 2,000 resamples and seed 20261029). It is reported as a secondary check with no confirmatory verdict (`results/KT_primary_k4_contrast.csv`).
+
+**11.8 Limits.** One pretend-launch week per product, so each L* subset has about 160 products. The products are steady sellers, so they are likely easier to forecast than real launches. Cancellations follow rule 3 (cancellations are not netted in the baseline).
+
+**11.9 Reproducibility re-run (not a new analysis).** The full chain (`data/prep_raw.R`, `data/feasibility_check.R`, `src/01` to `src/10`) is re-run from the raw zip, which is checked against its published SHA-256. Each committed file under `results/` and `data/summary/` is compared with the copy from before the re-run. The result is written to `results/R_reproducibility_check.csv`. Differences in timestamps or PNG bytes are classified and explained, not counted as numeric differences.
