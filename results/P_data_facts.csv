@@ -1,0 +1,9 @@
+fact,value_text
+product 23166: quantity on invoice 541431,74215
+product 23166: quantity on credit invoice C541433,-74215
+invoice 541431 date,2011-01-18
+credit C541433 date,2011-01-18
+launch products: min mean units per week (weeks L to 105),0.0103
+launch products: max mean units per week (weeks L to 105),1692.52
+"launch products: max mean units per week, test split",1692.52
+launch products: number of launch products,1661

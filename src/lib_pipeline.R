@@ -23,6 +23,12 @@ LOG_W_Z     <- dnorm(Z_GRID, log = TRUE) + log(DZ)
 TRAIN_SHARE_RANDOM <- 0.59               # share of eligible products in the random-split check
 GLOBAL_STEPS <- 30L
 
+# POST-HOC failure flag for an M4 fit (README section 5.1). Added after the test results had been read.
+# A fit is treated as failed when the marginal log-likelihood is below the nested no-random-effect model
+# (impossible at a true maximum) or when the spread tau is implausibly large (above 10 on the log scale).
+# The pre-registered F7 uses only the optimiser code and is not changed by this flag.
+m4_posthoc_failed_k <- function(info) info[(m4_loglik < m4_null_loglik) | (tau > 10), k]
+
 week_start_date <- function(w) W1_START + 7L * (as.integer(w) - 1L)
 date_to_week    <- function(d) as.integer(floor(as.numeric(as.Date(d) - W1_START) / 7) + 1L)
 
@@ -308,8 +314,10 @@ build_rows <- function(ctx, ids, k, cut, glob, K) {
 
 design_m4 <- function(rows) cbind(1, rows$log_s, rows$analog_log, rows$log_lp, rows$sin_s, rows$cos_s)
 
-fit_m4 <- function(rows, family = "nb", use_re = TRUE) {
-  X <- design_m4(rows)
+fit_m4 <- function(rows, family = "nb", use_re = TRUE, X_design = NULL, init = NULL) {
+  # X_design: optional fixed-effect matrix (used by src/13 for the nested F3 check); default is design_m4.
+  # init: optional full starting vector for optim (used by src/13 for multi-start checks); default is data-based.
+  X <- if (is.null(X_design)) design_m4(rows) else X_design
   y <- rows$y
   pidx <- as.integer(factor(rows$pid))
   P <- ncol(X)
@@ -340,7 +348,7 @@ fit_m4 <- function(rows, family = "nb", use_re = TRUE) {
   }
   b0 <- coef(lm(log1p(y) ~ X[, -1]))
   b0[is.na(b0)] <- 0
-  start <- c(b0, if (has_theta) log(5), if (use_re) log(0.3))
+  start <- if (is.null(init)) c(b0, if (has_theta) log(5), if (use_re) log(0.3)) else init
   fit <- optim(start, nll, method = "BFGS", control = list(maxit = 500, reltol = 1e-10))
   p <- unpack(fit$par)
   list(beta = p$b, theta = p$theta, tau = p$tau, family = family, use_re = use_re,

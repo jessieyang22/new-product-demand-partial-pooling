@@ -170,6 +170,8 @@ From `data/summary/feasibility_launch_counts.csv`, written by `data/feasibility_
 | Test launches with 12 weeks of history and 4 target weeks observed | 394 |
 | Test launches with 4 weeks of history and 4 target weeks observed | 579 |
 
+Note (dated 2026-10-30): the component A counts in `results/A_cleaning_and_launch_counts.csv` and `results/A_launch_cohort.csv` supersede these rough figures. The official counts are 1,661 launch products, 985 development launches and 676 test launches (not 1,662 and 677). The 676 figure is used in the README. The estimate of 677 differs by one. The likely cause is that the feasibility script does not cut the data at week 105 before it finds launches, so it can count a product whose first sale falls in the partial final week. This was not checked product by product.
+
 Week definition used here: Monday-start weeks, week 1 starts Monday 30 November 2009. The last full week is week 105, which starts 28 November 2011 and ends 4 December 2011. The partial week after it is dropped.
 
 What this means for the study:

@@ -1,0 +1,3 @@
+k,null_model,alt_model,alt_tau,alt_loglik,null_loglik,lrt_stat,lrt_p_boundary,alt_convergence,null_convergence,note
+4,"design_m4 + log1p_own, no random effect","design_m4 + log1p_own, random intercept",0.583803425592687,-22835.6871004573,-23266.3537824748,861.333364035083,1.24927524495264e-189,0,0,post-hoc; the original F3 null (design_m4 without log1p_own) is kept in results/B_failure_criteria_F1_F3_F6_F7.csv
+4,"design_m4, no random effect (original F3 null)","design_m4, random intercept (M4)",2.2982080199646,-23737.4419977695,-26066.2665286373,4657.64906173565,0,0,0,"original F3 comparison, re-fitted here as a reference"

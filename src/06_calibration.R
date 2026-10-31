@@ -30,8 +30,18 @@ find_c <- function(D, level) {
   NA_real_
 }
 
+# POST-HOC (README 5.1): M4 fits at k = 8, 12, 16, 20 failed the sanity check; their calibration rows are blanked.
+FAILED_M4_K <- m4_posthoc_failed_k(R$info)
 rows <- list()
 for (m in unique(P$model)) for (kk in K_GRID) {
+  if (m == "M4" && kk %in% FAILED_M4_K) {
+    for (level in c(0.8, 0.5)) rows[[length(rows) + 1L]] <- data.table(
+      model = m, k = kk, nominal = level, n_test_rows = NA_integer_, scale_c = NA_real_,
+      dev_coverage_raw = NA_real_, test_coverage_raw = NA_real_, test_width_raw = NA_real_,
+      test_coverage_conformal = NA_real_, test_width_conformal = NA_real_,
+      test_interval_score80_conformal = NA_real_, fit_status = "posthoc_failed (README 5.1)")
+    next
+  }
   dev <- P[model == m & k == kk & set == "train"]
   tst <- P[model == m & k == kk & set == "test"]
   for (level in c(0.8, 0.5)) {
@@ -51,7 +61,8 @@ for (m in unique(P$model)) for (kk in K_GRID) {
       test_width_raw = mean(raw$hi0 - raw$lo0),
       test_coverage_conformal = cov_fun(r$lo, r$hi, tst$y),
       test_width_conformal = mean(r$hi - r$lo),
-      test_interval_score80_conformal = if (level == 0.8) mean((r$hi - r$lo) + (2 / 0.2) * (r$lo - tst$y) * (tst$y < r$lo) + (2 / 0.2) * (tst$y - r$hi) * (tst$y > r$hi)) else NA_real_
+      test_interval_score80_conformal = if (level == 0.8) mean((r$hi - r$lo) + (2 / 0.2) * (r$lo - tst$y) * (tst$y < r$lo) + (2 / 0.2) * (tst$y - r$hi) * (tst$y > r$hi)) else NA_real_,
+      fit_status = "ok"
     )
   }
 }

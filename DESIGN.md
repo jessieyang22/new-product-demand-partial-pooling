@@ -67,7 +67,7 @@ These rules are written down now and are not changed after seeing test results.
 
 0. Sheet overlap. Sheet 1 (`Year 2009-2010`) and sheet 2 (`Year 2010-2011`) both contain the same 22,523 lines dated 1 to 9 December 2010. Rule: take sheet 1 for InvoiceDate before 1 December 2010, and sheet 2 for InvoiceDate from 1 December 2010 onward. Then the 9 overlapping days are counted once. The pipeline also checks that the two sheets agree on those 9 days (same line count) and stops if they do not.
 1. Keep lines whose StockCode looks like a product code (5 digits, optionally followed by letters). Drop non-product codes such as POST, D, M, BANK CHARGES, PADS, DOT and similar service codes.
-2. Drop lines with Price <= 0, missing StockCode, or an InvoiceDate that does not fall inside 1 December 2009 to 9 December 2011 (this removes the malformed 1899 dates).
+2. Drop lines with Price <= 0, missing StockCode, or an InvoiceDate that does not fall inside 1 December 2009 to 9 December 2011. (Dated note, 2026-10-30: the parenthetical that this removes malformed 1899 dates is wrong. No such dates exist in the data, as DATA.md section 9 and the cleaning counts show. The rule itself is unchanged and the window filter removes no rows for that reason. See section 12.6.)
 3. Invoices starting with "C" are cancellations. Primary demand = sum of positive Quantity on sales lines. Returns are excluded from demand. Robustness variant: net of returns.
 4. Week = Monday-start calendar week. Week 1 starts Monday 30 November 2009. The last partial week in the data is dropped.
 5. Series = one row per StockCode per week, units = primary demand. Zeros are filled in for weeks with no sales. Each product's series starts at its first week of data.
@@ -107,7 +107,7 @@ The primary headline number is WAPE for M4 versus M0 and M3 at k = 4, pooled ove
 
 **Component F. Robustness grid.** Each variant re-runs components B and E with one setting changed: burn-in of 13 weeks instead of 8; launch threshold of 5 units instead of 1; returns netted against demand; UK customers only; excluding the top 1% of products by volume; Poisson instead of negative binomial; K = 10, 20 and 40; and a random product split instead of the time split. The random split is run only as a warning check, to show how much a leaky split would overstate performance. A headline result is called fragile if its sign or its ranking of M4 against M0 and M3 changes under any variant.
 
-**Component G. Simulation layer (labelled method check, not a demand result).** Generates synthetic products with a known tau and known analog structure, then checks that component D recovers tau and that M4 beats M2 when pooling should help. Output files are named `sim_*` and every figure and table from this component carries the label "SIMULATION". Simulation results are never reported as evidence about real demand.
+**Component G. Simulation layer (labelled method check, not a demand result). [Removed 2026-10-30, see section 12.1. The text below is kept as written.]** Generates synthetic products with a known tau and known analog structure, then checks that component D recovers tau and that M4 beats M2 when pooling should help. Output files are named `sim_*` and every figure and table from this component carries the label "SIMULATION". Simulation results are never reported as evidence about real demand.
 
 **Real-data known-truth benchmark (within component B).** Mature products (sales in every week of the window) are truncated to pretend they launched at a chosen week. Their later weeks are real observed demand, so they serve as a second held-out set with known truth. This is reported separately from the launch test set.
 
@@ -148,18 +148,23 @@ new-product-demand-partial-pooling/
   README.md                 (question, data, method, results, limits, what failed; written last)
   data/
     download.R              (fetches the zip into data/raw/, checks size and sheet names)
+    prep_raw.R, feasibility_check.R
     raw/                    (gitignored, never committed)
-    processed/              (only if under 5 MB)
+    interim/                (gitignored, rebuilt by the pipeline)
+    summary/                (cleaning counts, committed)
   src/
+    00_config.R             (fixed settings)
+    lib_pipeline.R          (shared functions: cleaning, analogs, M0 to M5g, M4 fit and predict)
     01_clean_and_launches.R (component A)
     02_features_analogs.R   (component C, with leakage test)
-    03_models_baselines.R   (M0 to M3, M5)
-    04_model_partial_pool.R (M4, cmdstanr or glmmTMB)
+    03_models_baselines.R   (M0 to M3, M5, and M4 for each k)
+    04_pooling_diagnostics.R (component D; M4 itself is fitted in src/lib_pipeline.R, not in a separate script)
     05_cold_start_eval.R    (component B and metrics)
     06_calibration.R        (component E)
     07_robustness.R         (component F)
-    08_simulation_check.R   (component G, labelled)
+    08_simulation_check.R   (removed 2026-10-30, see section 12.1)
     09_figures.R            (ggplot2 figures, final output in R)
+    10_posthoc_concentration.R, 11_known_truth_benchmark.R, 12_posthoc_checks.R, 13_m4_numerical_checks.R, 14_regeneration_check.R (post-hoc, section 11 and 12)
   results/
     PROTOCOL_LOCK.txt
     *.csv                   (all numbers in the README come from these files)
@@ -171,7 +176,7 @@ Tooling: R. Installed packages to add: readxl, data.table, MASS, glmmTMB, cmdsta
 ## 9. Commit and publication rules
 
 - Public repo under jessieyang22 on GitHub. Push once results and the README exist. Before any test-set evaluation, DESIGN.md and the configuration files should be committed locally (git init in the project folder), which timestamps the protocol. Nothing was committed at design time, and the GitHub remote is not created at this step.
-- Commit messages end with `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
+- Commit messages end with `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`. [Dated note, 2026-10-30: this line is superseded. From 2026-10-30 commits end with `Co-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>`, which is the attribution the session requires and which all earlier commits used. See section 12.5.]
 - No raw data committed. No claim in the README without a matching CSV in `results/`.
 - No analogies or metaphors in the README or any prose. Every step is explained in plain English.
 
@@ -242,3 +247,25 @@ The selection never looks at weeks 53 or later, because that would condition on 
 **11.8 Limits.** One pretend-launch week per product, so each L* subset has about 160 products. The products are steady sellers, so they are likely easier to forecast than real launches. Cancellations follow rule 3 (cancellations are not netted in the baseline).
 
 **11.9 Reproducibility re-run (not a new analysis).** The full chain (`data/prep_raw.R`, `data/feasibility_check.R`, `src/01` to `src/10`) is re-run from the raw zip, which is checked against its published SHA-256. Each committed file under `results/` and `data/summary/` is compared with the copy from before the re-run. The result is written to `results/R_reproducibility_check.csv`. Differences in timestamps or PNG bytes are classified and explained, not counted as numeric differences.
+
+## 12. Amendments after review (dated 2026-10-30, post-hoc)
+
+These amendments were written after an external review of the completed run. They do not change the pre-registered decisions in sections 5 and 6, and the headline verdict (F1 triggered, negative) is unchanged. Each new analysis is labelled post-hoc in its script and in the README.
+
+**12.1 Simulation layer removed.** Component G (`src/08_simulation_check.R` and its outputs `results/sim_*`) generated fully synthetic products. The project rule is that no synthetic data stands in for a real result, and that simulation is allowed only as a method layered on real data. The layer did not meet that rule, so it is removed from the pipeline. Its history stays in git. No simulated number is reported. Rebuilding it on real weekly series is possible future work.
+
+**12.2 Failed M4 fits are labelled.** The four M4 fits at k = 8, 12, 16 and 20 fail the post-hoc sanity check (section 5.1 of the README). In `src/05` and `src/06`, their metric and calibration cells are now blank and marked `posthoc_failed`. The raw predictions remain in `data/interim/run_baseline.rds`. The flag is defined once in `src/lib_pipeline.R` (`m4_posthoc_failed_k`).
+
+**12.3 F3 corrected check (post-hoc).** The original F3 null (`design_m4` with tau = 0) has no product-level information, so rejecting tau = 0 is close to guaranteed and the original F3 row says little. `src/13` adds the product's own mean (`log1p_own`) to both the random-effect model and its null. The result is in `results/F3_nested_spread_check_k4.csv`. The original F3 row in `results/B_failure_criteria_F1_F3_F6_F7.csv` is kept unchanged.
+
+**12.4 Numerical checks (post-hoc).** `src/13` compares the M4 quadrature grids (61, 121, 201 and 401 points on [-6, 6], and 321 points on [-8, 8]) at k = 4 and k = 8. It also runs multi-start checks and a netted-variant run with product 23166 removed from the test set. `src/12` adds a conformal step check, a leave-one-product-out check and data facts. `src/11` (known-truth benchmark, section 11) is now run; its consistency check had a naming bug, fixed in commit `5b7319f`.
+
+**12.5 Commit attribution.** Section 9 is partly superseded. Commits made up to 2026-10-30 end with `Co-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>`, because the session attribution rule named that model. Commits made for the publication pass (2026-10-31) end with `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`, as the owner's publication instruction specified. Messages in the earlier commits are unchanged by the history rewrite (README section 1), so both trailers appear in the history. This is an open item for the owner (README section 9).
+
+**12.6 Rule 2 date note.** Rule 2 in section 3 is correct as a window filter. The 1899 dates it mentions do not exist in the combined data (DATA.md section 9), so the filter removes no rows for that reason.
+
+**12.7 Reproducibility check.** Section 11.9 is carried out as specified on 2026-10-31. A fresh copy of the repository (tracked and untracked source files only, no `results/`, `data/interim/`, `figures/` or `data/summary/`) was made in a scratch folder. The chain (`data/download.R` through `src/13`, the order in README section 8) was run there. `data/download.R` re-downloaded the zip from UCI and checked its size and sheet names. `src/14_reproducibility_check.R` compares every CSV, TXT and PNG in `results/`, `data/summary/` and `figures/` with the fresh output and writes `results/R_reproducibility_check.csv`. Its results are in README section 5.7. The earlier file name `results/R_regeneration_check.csv` (commit `8e0ac8e`) was never written to the repository and is not used. The regeneration script that compared against git history was replaced.
+
+**12.8 Ablations not run.** Two component C ablations in section 4 were never run: text similarity off (time and price only), and M4 with no analog term. They are listed as not run in the README.
+
+**12.9 Run time.** The full chain time is not in this file. The README gives a single observed figure, labelled as observed on a loaded machine.

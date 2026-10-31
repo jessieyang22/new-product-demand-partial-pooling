@@ -1,0 +1,4 @@
+rule,n_products
+"sold in every week 1 to 105 (literal rule, whole window)",0
+sold in every week 1 to 52 (development period),0
+sold in at least 45 of weeks 1 to 52 (used),638

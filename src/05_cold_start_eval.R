@@ -19,8 +19,19 @@ metric_tab <- function(D) D[, .(
   interval_score80_draws = mean(is80), crps = mean(crps)
 ), by = .(model, k)]
 
-pooled <- metric_tab(P)
-byh <- P[, c(metric_tab(.SD)), by = h]
+# POST-HOC (README 5.1): M4 fits at k = 8, 12, 16, 20 failed the sanity check. Their metric cells are blanked
+# and labelled, so the tables show the row without numbers. The raw predictions are kept in run_baseline.rds.
+FAILED_M4_K <- m4_posthoc_failed_k(R$info)
+mark_failed <- function(T) {
+  T[, fit_status := "ok"]
+  bad <- T$model == "M4" & T$k %in% FAILED_M4_K
+  T[bad, fit_status := "posthoc_failed (README 5.1)"]
+  num_cols <- setdiff(names(T)[vapply(T, is.numeric, logical(1))], c("k", "h", "n_rows", "n_products"))
+  for (cc in num_cols) T[bad, (cc) := NA_real_]
+  T
+}
+pooled <- mark_failed(metric_tab(P))
+byh <- mark_failed(P[, c(metric_tab(.SD)), by = h])
 fwrite(pooled, "results/B_cold_start_metrics_pooled_h1to4.csv")
 fwrite(byh, "results/B_cold_start_metrics_by_h.csv")
 

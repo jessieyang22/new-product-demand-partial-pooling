@@ -1,0 +1,2 @@
+variant,excluded_product,product_in_netted_test_cohort,n_test_products_all,n_test_products_used,wape_M4_all,wape_M0_all,wape_M3_all,wape_M4_excl,wape_M0_excl,wape_M3_excl,diff_M4_minus_best_all_pts,diff_M4_minus_best_excl_pts
+netted,StockCode 23166 (test set only),TRUE,579,578,0.61224442766505,0.681377230128885,0.897455476644338,0.610944197738958,0.680887281940303,0.894586726901682,-6.91328024638352,-6.99430842013448

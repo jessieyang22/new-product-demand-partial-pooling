@@ -1,0 +1,6 @@
+k,target,comparators,wape_target,wape_best_comparator,diff_pts,ci_low_pts,ci_high_pts,n_products,role,rule_met_secondary,analysis
+4,M4,M0/M3,0.793413712440835,1.02713765681879,-23.372394437795,-31.7832010447552,-13.2958727914777,638,secondary check of the section 5 rule (not confirmatory),TRUE,POST-HOC known-truth benchmark (DESIGN.md section 11); not pre-registered
+4,M4,M1,0.793413712440835,0.923172465511585,-12.975875307075,-18.3734179879219,-8.25960233481205,638,secondary,,POST-HOC known-truth benchmark (DESIGN.md section 11); not pre-registered
+4,M4,M5,0.793413712440835,1.12724936335088,-33.3835650910048,-41.4174527774501,-26.0042144768402,638,secondary,,POST-HOC known-truth benchmark (DESIGN.md section 11); not pre-registered
+4,M3,M0,1.08813459521679,1.02713765681879,6.09969383980051,-8.72068164748688,22.4520103307024,638,secondary,,POST-HOC known-truth benchmark (DESIGN.md section 11); not pre-registered
+4,M5,M5g,1.12724936335088,1.17790808787741,-5.0658724526528,-8.25932464921615,-1.8103788867812,638,secondary,,POST-HOC known-truth benchmark (DESIGN.md section 11); not pre-registered

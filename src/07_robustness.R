@@ -47,9 +47,9 @@ run_variant <- function(name, over) {
                     wape_M4 = pw["M4"], wape_M0 = pw["M0"], wape_M3 = pw["M3"],
                     diff_M4_minus_best_pts = 100 * (pw["M4"] - best_p),
                     ci_low_pts = 100 * quantile(diff_b, 0.025), ci_high_pts = 100 * quantile(diff_b, 0.975),
-                    ranking_low_to_high_WAPE = rank_order,
-                    secs = round(as.numeric(difftime(Sys.time(), t0, units = "secs"))))
-  message(name, " done in ", out$secs, " s")
+                    ranking_low_to_high_WAPE = rank_order)
+  # Run time is written to the console only, so that re-runs give byte-identical CSV output
+  message(name, " done in ", round(as.numeric(difftime(Sys.time(), t0, units = "secs"))), " s")
   out
 }
 
