@@ -5,3 +5,7 @@ Before this commit: development-only steps (src/01_clean_and_launches.R, src/02_
 After this commit: src/03 to src/09 are run, which produce the test-set results.
 Any change to code or configuration after this point is a post-hoc change and must be labelled in the README.
 Seed: 20261029 (all random steps).
+
+HISTORY REWRITE (2026-10-31, before publication): commit hashes changed once (author set to the GitHub noreply address, local paths removed in text files). The file tree at the locked commit is unchanged by the rewrite.
+Locked commit after the rewrite: 98583052333e09a765458a47689dd822a65d6f24 (previously d3dad85cb3c15074a5157099d5427d95711d5365).
+Other hashes cited in README and DESIGN, old to new: 5b7319f -> 61c540a, 8e0ac8e -> 02d447c.

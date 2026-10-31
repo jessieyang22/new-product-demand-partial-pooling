@@ -262,7 +262,7 @@ All of these are labelled post-hoc and none changes a pre-registered verdict.
 
 ## 6. Deviations from DESIGN.md
 
-All deviations were written as dated amendments in `DESIGN.md` section 10 before the test-set evaluation was run (commit `d3dad85` before the history rewrite; lock recorded in `results/PROTOCOL_LOCK.txt`). Later amendments are in DESIGN.md section 12. The main ones:
+All deviations were written as dated amendments in `DESIGN.md` section 10 before the test-set evaluation was run (commit `9858305`; lock recorded in `results/PROTOCOL_LOCK.txt`. The file tree at that commit is unchanged by the history rewrite). Later amendments are in DESIGN.md section 12. The main ones:
 
 1. **6.1 Fitting method.** M4 is maximum marginal likelihood with a random intercept (empirical Bayes), integrated on a 61-point grid. The Bayesian fit with 4 chains was not run.
 2. **6.2 Analog offset.** The analog curve is a fixed covariate with an estimated coefficient, not a fixed offset of 1.
